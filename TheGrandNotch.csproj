@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\notch.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\notch.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ical.Net" Version="4.3.0" />
+    <!-- NodaTime est une dépendance transitive d'Ical.Net ; on fixe la version minimale
+         pour éviter le FileNotFoundException au runtime (mismatch 3.1.10 vs 3.1.12). -->
+    <PackageReference Include="NodaTime" Version="3.1.12" />
+  </ItemGroup>
+
+  <!-- Le projet wpftmp (génération XAML) ne résout pas les NuGet tiers.
+       Stub sans dépendances pour wpftmp ; implémentation réelle pour le build principal. -->
+  <ItemGroup>
+    <Compile Remove="Services\ICalService.cs" />
+    <Compile Remove="Services\ICalServiceStub.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="!$(MSBuildProjectName.Contains('wpftmp'))">
+    <Compile Include="Services\ICalService.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="$(MSBuildProjectName.Contains('wpftmp'))">
+    <Compile Include="Services\ICalServiceStub.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,339 @@
+<Window x:Class="TheGrandNotch.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="The Grand Notch — Paramètres"
+        Width="460"
+        Height="560"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        ShowInTaskbar="True"
+        Topmost="True"
+        UseLayoutRounding="True">
+
+    <Window.Resources>
+        <Style x:Key="Lbl" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#DDFFFFFF" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="Val" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#99FFFFFF" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+        <Style x:Key="Section" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFFFFFFF" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,14,0,6" />
+        </Style>
+        <Style x:Key="Row" TargetType="Grid">
+            <Setter Property="Margin" Value="0,5,0,5" />
+        </Style>
+        <Style TargetType="Slider">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="16"
+            Background="#FF0E0E10"
+            BorderBrush="#1FFFFFFF"
+            BorderThickness="1">
+        <DockPanel LastChildFill="True">
+
+            <!-- Header (barre de titre : glisser pour déplacer) -->
+            <Grid DockPanel.Dock="Top"
+                  Height="44"
+                  Background="Transparent"
+                  MouseLeftButtonDown="OnHeaderDrag">
+                <TextBlock Text="Paramètres"
+                           Foreground="White"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
+                           Margin="18,0,0,0" />
+                <Button Content="✕"
+                        Click="OnCloseClick"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,0,12,0"
+                        Width="28" Height="28"
+                        Foreground="#CCFFFFFF"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        FontSize="13" />
+            </Grid>
+
+            <!-- Footer -->
+            <Border DockPanel.Dock="Bottom"
+                    BorderBrush="#1AFFFFFF"
+                    BorderThickness="0,1,0,0"
+                    Padding="18,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0"
+                            Content="Réinitialiser les valeurs par défaut"
+                            Click="OnResetClick"
+                            Height="34"
+                            Foreground="White"
+                            Background="#FF2A2A2E"
+                            BorderBrush="#33FFFFFF"
+                            BorderThickness="1"
+                            Cursor="Hand"
+                            FontSize="12.5">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8" />
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button Grid.Column="2"
+                            Content="Quitter"
+                            Click="OnQuitClick"
+                            Height="34"
+                            Padding="18,0"
+                            Foreground="White"
+                            Background="#33FF3B30"
+                            BorderBrush="#66FF3B30"
+                            BorderThickness="1"
+                            Cursor="Hand"
+                            FontSize="12.5">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8" />
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          Padding="18,0,18,16">
+                <StackPanel>
+
+                    <TextBlock Text="Forme repliée" Style="{StaticResource Section}" />
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Largeur" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_Width" Minimum="100" Maximum="500"
+                                Value="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_Width, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Hauteur" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_Height" Minimum="20" Maximum="80"
+                                Value="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_Height, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Arrondi du bas" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_Corner" Minimum="0" Maximum="40"
+                                Value="{Binding CornerRadiusBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_Corner, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Extension mini (px)" Style="{StaticResource Lbl}"
+                                   ToolTip="Largeur ajoutée de chaque côté quand un média est actif en mode replié" />
+                        <Slider Grid.Column="1" x:Name="S_MiniExt" Minimum="0" Maximum="120"
+                                Value="{Binding MiniExtraWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_MiniExt, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <TextBlock Text="Forme déployée (au survol)" Style="{StaticResource Section}" />
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Largeur" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_ExpW" Minimum="300" Maximum="900"
+                                Value="{Binding ExpandedWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_ExpW, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Hauteur" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_ExpH" Minimum="60" Maximum="300"
+                                Value="{Binding ExpandedHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_ExpH, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Arrondi du bas" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_ExpCorner" Minimum="0" Maximum="60"
+                                Value="{Binding ExpandedCornerRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_ExpCorner, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <TextBlock Text="Animation" Style="{StaticResource Section}" />
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Durée (ms)" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_Anim" Minimum="100" Maximum="800"
+                                Value="{Binding AnimationDurationMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_Anim, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Rebond (amplitude)" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_Easing" Minimum="0" Maximum="1"
+                                TickFrequency="0.05"
+                                Value="{Binding EasingAmplitude, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_Easing, Path=Value, StringFormat=0.00}" />
+                    </Grid>
+
+                    <TextBlock Text="Position &amp; comportement" Style="{StaticResource Section}" />
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Décalage haut (px)" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_Top" Minimum="0" Maximum="100"
+                                Value="{Binding TopOffset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_Top, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Réassert. topmost (ms)" Style="{StaticResource Lbl}" />
+                        <Slider Grid.Column="1" x:Name="S_Topmost" Minimum="0" Maximum="1000"
+                                Value="{Binding TopmostReassertionMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ValueChanged="OnSliderChanged" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource Val}"
+                                   Text="{Binding ElementName=S_Topmost, Path=Value, StringFormat=0}" />
+                    </Grid>
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="48" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Couleur de fond" Style="{StaticResource Lbl}" />
+                        <TextBox Grid.Column="1" x:Name="T_Color"
+                                 Text="{Binding BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 TextChanged="OnColorChanged"
+                                 VerticalAlignment="Center"
+                                 Background="#FF2A2A2E"
+                                 Foreground="White"
+                                 BorderBrush="#33FFFFFF"
+                                 Padding="6,4" />
+                        <Border Grid.Column="2" x:Name="ColorSwatch"
+                                Width="28" Height="20"
+                                CornerRadius="4"
+                                BorderBrush="#55FFFFFF"
+                                BorderThickness="1" />
+                    </Grid>
+
+                    <TextBlock Text="Démarrage au boot" Style="{StaticResource Section}" />
+
+                    <Grid Style="{StaticResource Row}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Méthode" Style="{StaticResource Lbl}" />
+                        <ComboBox Grid.Column="1" x:Name="StartupCombo"
+                                  SelectionChanged="OnStartupChanged"
+                                  VerticalAlignment="Center">
+                            <ComboBoxItem Tag="None" Content="Désactivé" />
+                            <ComboBoxItem Tag="Registry" Content="Registre (sans admin)" />
+                            <ComboBoxItem Tag="StartupFolder" Content="Dossier Démarrage (sans admin)" />
+                            <ComboBoxItem Tag="ScheduledTask" Content="Tâche planifiée — démarrage anticipé (admin)" />
+                        </ComboBox>
+                    </Grid>
+
+                    <TextBlock Text="La tâche planifiée demande une élévation (UAC) et démarre l'app très tôt au logon avec privilèges élevés."
+                               Foreground="#80FFFFFF"
+                               FontSize="10.5"
+                               TextWrapping="Wrap"
+                               Margin="0,2,0,0" />
+
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</Window>

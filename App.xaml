@@ -1,0 +1,68 @@
+<Application x:Class="TheGrandNotch.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:TheGrandNotch"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <!-- ============================================================
+             SYSTÈME DE DESIGN — tokens partagés (esprit Apple HIG).
+             Référencés via {StaticResource ...} dans tout le XAML.
+             Une seule source de vérité = hiérarchie visuelle cohérente.
+             ============================================================ -->
+
+        <!-- ÉCHELLE TYPOGRAPHIQUE — 7 paliers (remplace 11 tailles dispersées) -->
+        <sys:Double x:Key="FontMicro">7</sys:Double>      <!-- badges, compteurs -->
+        <sys:Double x:Key="FontTiny">9</sys:Double>       <!-- glyphes ✕, micro-labels -->
+        <sys:Double x:Key="FontCaption2">10</sys:Double>  <!-- légendes 2aires (temps, sous-titres) -->
+        <sys:Double x:Key="FontCaption">11</sys:Double>   <!-- légendes, boutons, HUD -->
+        <sys:Double x:Key="FontBody">12</sys:Double>      <!-- corps : artiste, noms, champs -->
+        <sys:Double x:Key="FontHeadline">13</sys:Double>  <!-- titres de section, alias -->
+        <sys:Double x:Key="FontTitle">15</sys:Double>     <!-- titre média, mois -->
+
+        <!-- ÉCHELLE DE RAYONS — structurels uniquement.
+             Les cercles / pills gardent r = hauteur/2 en littéral (sémantique). -->
+        <CornerRadius x:Key="RadiusM">6</CornerRadius>    <!-- petites cartes -->
+        <CornerRadius x:Key="RadiusL">8</CornerRadius>    <!-- boutons -->
+        <CornerRadius x:Key="RadiusXL">10</CornerRadius>  <!-- cartes -->
+        <CornerRadius x:Key="Radius2XL">12</CornerRadius> <!-- panneaux -->
+        <CornerRadius x:Key="Radius3XL">14</CornerRadius> <!-- conteneurs -->
+
+        <!-- GRILLE D'ESPACEMENT — base 2pt, rythme 4 / 8 / 12 / 16.
+             WPF n'autorise pas l'arithmétique inline sur Thickness : on snappe
+             donc les marges sur cette grille au lieu de tokeniser chaque Thickness
+             (plus sain à maintenir pour une UI dense que des dizaines de tokens). -->
+        <sys:Double x:Key="Space4">4</sys:Double>
+        <sys:Double x:Key="Space8">8</sys:Double>
+        <sys:Double x:Key="Space12">12</sys:Double>
+        <sys:Double x:Key="Space16">16</sys:Double>
+
+        <!-- Tooltips sombres premium (remplace le fond clair système, incohérent avec la notch) -->
+        <Style TargetType="ToolTip">
+            <Setter Property="Background" Value="#FF1C1C1E" />
+            <Setter Property="Foreground" Value="#E6FFFFFF" />
+            <Setter Property="BorderBrush" Value="#33FFFFFF" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="{StaticResource FontCaption}" />
+            <Setter Property="Padding" Value="9,5" />
+            <Setter Property="HasDropShadow" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource RadiusL}"
+                                Padding="{TemplateBinding Padding}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="14"
+                                                  ShadowDepth="2" Opacity="0.45" />
+                            </Border.Effect>
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Application.Resources>
+</Application>

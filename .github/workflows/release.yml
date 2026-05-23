@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish (self-contained win-x64)
+        run: dotnet publish TheGrandNotch.csproj /p:PublishProfile=Release-x64 --nologo
+
+      - name: Créer l'archive ZIP
+        run: |
+          $version = "${{ github.ref_name }}"
+          $zipName = "TheGrandNotch-$version-win-x64.zip"
+          Compress-Archive -Path publish\* -DestinationPath $zipName
+          echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Créer la Release GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "TheGrandNotch ${{ github.ref_name }}"
+          body: |
+            ## Installation
+
+            1. Téléchargez et décompressez `TheGrandNotch-${{ github.ref_name }}-win-x64.zip`
+            2. Ouvrez **PowerShell en tant qu'Administrateur**
+            3. Naviguez dans le dossier, puis exécutez :
+               ```powershell
+               .\install-uiaccess.ps1
+               ```
+            4. Lancez `C:\Program Files\TheGrandNotch\TheGrandNotch.exe`
+
+            > L'étape Admin est requise une seule fois pour que la notch reste au-dessus de toutes les fenêtres (UIAccess).
+          files: ${{ env.ZIP_NAME }}
+          draft: false
+          prerelease: false
