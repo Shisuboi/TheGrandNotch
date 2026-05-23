@@ -28,6 +28,7 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}"
           $zipName = "TheGrandNotch-$version-win-x64.zip"
+          Copy-Item install-uiaccess.ps1 publish\
           Compress-Archive -Path publish\* -DestinationPath $zipName
           echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
         shell: pwsh
