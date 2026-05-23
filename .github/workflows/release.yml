@@ -29,6 +29,7 @@ jobs:
           $version = "${{ github.ref_name }}"
           $zipName = "TheGrandNotch-$version-win-x64.zip"
           Copy-Item install-uiaccess.ps1 publish\
+          Copy-Item install.bat publish\
           Compress-Archive -Path publish\* -DestinationPath $zipName
           echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
         shell: pwsh
@@ -41,12 +42,8 @@ jobs:
             ## Installation
 
             1. Téléchargez et décompressez `TheGrandNotch-${{ github.ref_name }}-win-x64.zip`
-            2. Ouvrez **PowerShell en tant qu'Administrateur**
-            3. Naviguez dans le dossier, puis exécutez :
-               ```powershell
-               .\install-uiaccess.ps1
-               ```
-            4. Lancez `C:\Program Files\TheGrandNotch\TheGrandNotch.exe`
+            2. **Clic droit** sur `install.bat` → **Exécuter en tant qu'administrateur**
+            3. Lancez `C:\Program Files\TheGrandNotch\TheGrandNotch.exe`
 
             > L'étape Admin est requise une seule fois pour que la notch reste au-dessus de toutes les fenêtres (UIAccess).
           files: ${{ env.ZIP_NAME }}

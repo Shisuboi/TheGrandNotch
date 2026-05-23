@@ -37,22 +37,14 @@ Inspiré de [TheBoringNotch](https://github.com/TheBoringNotch/TheBoringNotch) (
 ### Première installation
 
 1. Téléchargez la dernière version dans les [Releases](https://github.com/Shisuboi/TheGrandNotch/releases/latest) et décompressez l'archive.
-2. Ouvrez **PowerShell en tant qu'Administrateur** :
-   - Clic droit sur le menu Démarrer → *Terminal (Admin)* ou *Windows PowerShell (Admin)*
-3. Naviguez jusqu'au dossier téléchargé :
-   ```powershell
-   cd "C:\chemin\vers\le\dossier"
-   ```
-4. Exécutez le script d'installation :
-   ```powershell
-   .\install-uiaccess.ps1
-   ```
+2. **Clic droit** sur `install.bat` → **Exécuter en tant qu'administrateur**
+
    Le script va :
    - Créer un certificat de signature auto-signé (local, aucune donnée envoyée)
    - Signer l'exécutable (requis par Windows pour UIAccess)
    - Copier l'application dans `C:\Program Files\TheGrandNotch\`
 
-5. Lancez `C:\Program Files\TheGrandNotch\TheGrandNotch.exe`
+3. Lancez `C:\Program Files\TheGrandNotch\TheGrandNotch.exe`
 
 ### Mises à jour
 
