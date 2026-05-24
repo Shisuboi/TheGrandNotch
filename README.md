@@ -32,23 +32,20 @@ Inspiré de [TheBoringNotch](https://github.com/TheBoringNotch/TheBoringNotch) (
 
 ## Installation
 
-> L'application tourne dans la bande UIAccess de Windows pour rester au-dessus de toutes les autres fenêtres. Cela nécessite une première installation en tant qu'Administrateur.
-
-### Première installation
-
 1. Téléchargez la dernière version dans les [Releases](https://github.com/Shisuboi/TheGrandNotch/releases/latest) et décompressez l'archive.
-2. **Clic droit** sur `install.bat` → **Exécuter en tant qu'administrateur**
+2. Double-cliquez sur **`install.bat`** → acceptez l'invite UAC.
 
-   Le script va :
-   - Créer un certificat de signature auto-signé (local, aucune donnée envoyée)
-   - Signer l'exécutable (requis par Windows pour UIAccess)
-   - Copier l'application dans `C:\Program Files\TheGrandNotch\`
+C'est tout. L'installateur :
+- Signe l'exécutable (requis par Windows pour rester au-dessus de toutes les fenêtres)
+- Copie l'application dans `C:\Program Files\TheGrandNotch\`
+- Crée un raccourci sur le **bureau** et dans le **menu Démarrer**
+- Lance TheGrandNotch automatiquement
 
-3. Lancez `C:\Program Files\TheGrandNotch\TheGrandNotch.exe`
+> Aucune donnée n'est envoyée : le certificat de signature est créé localement sur votre machine.
 
 ### Mises à jour
 
-Pour mettre à jour, re-téléchargez la nouvelle version et réexécutez `install-uiaccess.ps1` (PowerShell Admin). Vos réglages sont conservés.
+Double-cliquez à nouveau sur `install.bat` depuis la nouvelle version. Vos réglages sont conservés.
 
 ---
 
@@ -87,11 +84,9 @@ Toutes les données utilisateur restent sur votre machine (`%AppData%\TheGrandNo
 
 ## Fonctionnalités à venir
 
-- Indicateur batterie (laptops)
-- Keep-Awake (anti-veille)
 - Raccourci clavier global pour ouvrir la notch
-- Sélecteur de sortie audio
 - Support multi-moniteurs
+- Notifications système dans la notch
 
 Voir le [backlog complet](BACKLOG.md) pour les détails et priorités.
 

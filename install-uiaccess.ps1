@@ -1,7 +1,6 @@
 # install-uiaccess.ps1
-# Signe l'exe et installe dans Program Files.
+# Signe l'exe, installe dans Program Files, cree les raccourcis et lance l'app.
 # UIAccess exige : exe signe + repertoire securise (Program Files).
-# A executer une seule fois en tant qu'Administrateur.
 
 #Requires -RunAsAdministrator
 
@@ -52,5 +51,29 @@ Write-Host "Fichiers copies." -ForegroundColor Green
 Set-AuthenticodeSignature -FilePath "$InstallDir\$ExeName" -Certificate $cert | Out-Null
 Write-Host "Exe installe resigne." -ForegroundColor Green
 
-Write-Host "`n=== OK ===" -ForegroundColor Green
-Write-Host "Lance : $InstallDir\$ExeName"
+# --- Raccourcis ---
+Write-Host "`n=== Raccourcis ===" -ForegroundColor Cyan
+$WshShell = New-Object -comObject WScript.Shell
+
+$DesktopPath = [System.Environment]::GetFolderPath("CommonDesktopDirectory")
+$Shortcut = $WshShell.CreateShortcut("$DesktopPath\TheGrandNotch.lnk")
+$Shortcut.TargetPath      = "$InstallDir\$ExeName"
+$Shortcut.WorkingDirectory = $InstallDir
+$Shortcut.Description     = "TheGrandNotch — Dynamic Island pour Windows"
+$Shortcut.Save()
+Write-Host "Raccourci bureau cree." -ForegroundColor Green
+
+$StartMenuPath = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs"
+$Shortcut2 = $WshShell.CreateShortcut("$StartMenuPath\TheGrandNotch.lnk")
+$Shortcut2.TargetPath      = "$InstallDir\$ExeName"
+$Shortcut2.WorkingDirectory = $InstallDir
+$Shortcut2.Description     = "TheGrandNotch — Dynamic Island pour Windows"
+$Shortcut2.Save()
+Write-Host "Raccourci menu Demarrer cree." -ForegroundColor Green
+
+# --- Lancement ---
+Write-Host "`n=== Lancement ===" -ForegroundColor Cyan
+Start-Process "$InstallDir\$ExeName"
+Write-Host "TheGrandNotch demarre." -ForegroundColor Green
+
+Write-Host "`n=== Installation terminee ===" -ForegroundColor Green

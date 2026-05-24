@@ -1,16 +1,14 @@
 @echo off
-:: Verifie les droits admin
+:: Auto-elevation : relance ce script en administrateur si besoin
 net session >nul 2>&1
 if %errorLevel% neq 0 (
-    echo.
-    echo  Erreur : ce script doit etre execute en tant qu'Administrateur.
-    echo  Clic droit sur install.bat ^> "Executer en tant qu'administrateur"
-    echo.
-    pause
-    exit /b 1
+    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    exit /b
 )
 
-echo Installation de TheGrandNotch...
+echo.
+echo  Installation de TheGrandNotch...
+echo.
 powershell.exe -ExecutionPolicy Bypass -File "%~dp0install-uiaccess.ps1"
 
 if %errorLevel% neq 0 (
@@ -20,4 +18,4 @@ if %errorLevel% neq 0 (
     exit /b 1
 )
 
-pause
+exit /b 0

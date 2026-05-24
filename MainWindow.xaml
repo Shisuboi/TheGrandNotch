@@ -239,10 +239,6 @@
                             <Path x:Name="HomeIcon" Fill="White" Stretch="Uniform" Width="17" Height="17"
                                   Data="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                         </Button>
-                        <Button Style="{StaticResource MediaButton}" ToolTip="Boîte" Click="OnInboxTabClick" Margin="2,0,0,0">
-                            <Path x:Name="InboxIcon" Fill="#99FFFFFF" Stretch="Uniform" Width="17" Height="17"
-                                  Data="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z" />
-                        </Button>
                         <Button Style="{StaticResource MediaButton}" ToolTip="Réseau" Click="OnNetworkTabClick" Margin="2,0,0,0">
                             <Grid Width="20" Height="20">
                                 <Path x:Name="NetworkIcon" Fill="#99FFFFFF" Stretch="Uniform" Width="17" Height="17"
@@ -450,65 +446,14 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- ===== PAGE BOÎTE : étagère de fichiers (drag & drop) ===== -->
-                <Grid x:Name="InboxView" Grid.Row="1" Visibility="Collapsed">
-                    <Grid.RenderTransform><TranslateTransform x:Name="InboxViewT" /></Grid.RenderTransform>
-                    <Border Background="#0CFFFFFF" CornerRadius="{StaticResource Radius3XL}"
-                            BorderBrush="#2EFFFFFF" BorderThickness="1.4" Margin="0,2,0,2" />
-                    <TextBlock x:Name="ShelfEmpty" Text="Glissez des fichiers ici"
-                               Foreground="#99FFFFFF" FontSize="{StaticResource FontHeadline}"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Disabled"
-                                  VerticalAlignment="Center" Margin="8,0">
-                        <ItemsControl x:Name="ShelfList">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Width="84" Margin="6,2" Padding="6,8" CornerRadius="{StaticResource RadiusXL}"
-                                            Background="#16FFFFFF" Cursor="Hand"
-                                            PreviewMouseLeftButtonDown="OnShelfItemMouseDown"
-                                            PreviewMouseMove="OnShelfItemMouseMove"
-                                            ToolTip="{Binding Path}">
-                                        <StackPanel>
-                                            <Grid Width="40" Height="40" HorizontalAlignment="Center">
-                                                <Image Source="{Binding Icon}" Width="40" Height="40" />
-                                                <Border Width="26" Height="26" Background="Transparent"
-                                                        HorizontalAlignment="Right" VerticalAlignment="Top"
-                                                        Margin="0,-11,-13,0" Cursor="Hand"
-                                                        Tag="{Binding}"
-                                                        MouseLeftButtonDown="OnShelfItemRemove">
-                                                    <Border Width="17" Height="17" CornerRadius="8.5"
-                                                            Background="#DD1C1C1E" BorderBrush="#55FFFFFF" BorderThickness="1"
-                                                            IsHitTestVisible="False">
-                                                        <TextBlock Text="✕" Foreground="White" FontSize="{StaticResource FontTiny}"
-                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-                                                </Border>
-                                            </Grid>
-                                            <TextBlock Text="{Binding Name}" Foreground="#DDFFFFFF" FontSize="{StaticResource FontCaption2}"
-                                                       TextTrimming="CharacterEllipsis" TextAlignment="Center"
-                                                       MaxWidth="76" Margin="0,5,0,0" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
-
-                <!-- ===== PAGE RÉSEAU : envoi LocalSend ===== -->
+                <!-- ===== PAGE PARTAGE : Boîte (gauche) + Envoi LocalSend (droite) ===== -->
                 <Grid x:Name="NetworkView" Grid.Row="1" Visibility="Collapsed">
                     <Grid.RenderTransform><TranslateTransform x:Name="NetworkViewT" /></Grid.RenderTransform>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />  <!-- notification transfert entrant -->
-                        <RowDefinition Height="Auto" />  <!-- fichiers + boutons -->
-                        <RowDefinition Height="Auto" />  <!-- saisie texte (masquée) -->
-                        <RowDefinition Height="*" />     <!-- pairs + statut -->
+                        <RowDefinition Height="*" />     <!-- share panel / peer picker -->
+                        <RowDefinition Height="Auto" />  <!-- saisie texte -->
+                        <RowDefinition Height="Auto" />  <!-- statut d'envoi -->
                     </Grid.RowDefinitions>
 
                     <!-- ── Notification transfert entrant ── -->
@@ -523,107 +468,192 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-
-                            <!-- Icône + infos -->
                             <Grid Grid.Row="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Path Grid.Column="0"
-                                      Fill="#CCFFFFFF" Stretch="Uniform" Width="18" Height="18"
+                                <Path Grid.Column="0" Fill="#CCFFFFFF" Stretch="Uniform" Width="18" Height="18"
                                       Margin="0,0,10,0" VerticalAlignment="Center"
                                       Data="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z" />
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock x:Name="IncomingSender"
-                                               Foreground="White" FontSize="{StaticResource FontBody}" FontWeight="SemiBold" />
-                                    <TextBlock x:Name="IncomingFiles"
-                                               Foreground="#BBFFFFFF" FontSize="{StaticResource FontCaption2}"
-                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock x:Name="IncomingSender" Foreground="White" FontSize="{StaticResource FontBody}" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="IncomingFiles" Foreground="#BBFFFFFF" FontSize="{StaticResource FontCaption2}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Grid>
-
-                            <!-- Boutons -->
                             <Grid Grid.Row="1" Margin="0,7,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="6" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Style="{StaticResource AcceptButton}"
-                                        Click="OnAcceptTransfer">✓  Accepter</Button>
-                                <Button Grid.Column="2" Style="{StaticResource DeclineButton}"
-                                        Click="OnDeclineTransfer">✕  Refuser</Button>
+                                <Button Grid.Column="0" Style="{StaticResource AcceptButton}" Click="OnAcceptTransfer">✓  Accepter</Button>
+                                <Button Grid.Column="2" Style="{StaticResource DeclineButton}" Click="OnDeclineTransfer">✕  Refuser</Button>
                             </Grid>
                         </Grid>
                     </Border>
 
-                    <!-- Zone fichiers + boutons -->
-                    <Grid Grid.Row="1" Margin="0,0,0,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                    <!-- ── Zone principale (SharePanel ou PeerPickerPanel) ── -->
+                    <Grid Grid.Row="1" MinHeight="110">
 
-                        <ScrollViewer x:Name="NetworkFilesScroll" Grid.Column="0"
-                                      HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      Visibility="Collapsed">
-                            <ItemsControl x:Name="NetworkFilesList">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Width="52" Margin="2,1" Padding="4,5" CornerRadius="{StaticResource RadiusXL}"
-                                                Background="#16FFFFFF" Cursor="Hand" ToolTip="{Binding Path}">
-                                            <StackPanel>
-                                                <Grid Width="28" Height="28" HorizontalAlignment="Center">
-                                                    <Image Source="{Binding Icon}" Width="28" Height="28" />
-                                                    <Border Width="22" Height="22" Background="Transparent"
-                                                            HorizontalAlignment="Right" VerticalAlignment="Top"
-                                                            Margin="0,-8,-10,0" Cursor="Hand"
-                                                            Tag="{Binding}" MouseLeftButtonDown="OnNetworkFileRemove">
-                                                        <Border Width="14" Height="14" CornerRadius="7"
-                                                                Background="#DD1C1C1E" BorderBrush="#55FFFFFF" BorderThickness="1"
-                                                                IsHitTestVisible="False">
-                                                            <TextBlock Text="✕" Foreground="White" FontSize="{StaticResource FontMicro}"
-                                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <!-- SHARE PANEL : Zone d'envoi LocalSend (pleine largeur) -->
+                        <Grid x:Name="SharePanel">
+                            <!-- Zone d'envoi LocalSend -->
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Zone fichiers (drop target) -->
+                                <Border Grid.Row="0"
+                                        Background="#0CFFFFFF" CornerRadius="{StaticResource Radius2XL}"
+                                        BorderBrush="#1AFFFFFF" BorderThickness="1"
+                                        AllowDrop="True"
+                                        DragOver="OnSendZoneDragOver" Drop="OnSendZoneDrop">
+                                    <Grid>
+                                        <TextBlock x:Name="SendHint" Text="Glisser pour envoyer"
+                                                   Foreground="#44FFFFFF" FontSize="{StaticResource FontTiny}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   TextAlignment="Center" TextWrapping="Wrap" MaxWidth="80" />
+                                        <ScrollViewer x:Name="NetworkFilesScroll"
+                                                      HorizontalScrollBarVisibility="Auto"
+                                                      VerticalScrollBarVisibility="Disabled"
+                                                      VerticalAlignment="Center" Margin="4,0"
+                                                      Visibility="Collapsed">
+                                            <ItemsControl x:Name="NetworkFilesList">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="48" Margin="2,1" Padding="3,4"
+                                                                CornerRadius="{StaticResource RadiusXL}"
+                                                                Background="#16FFFFFF" Cursor="Hand" ToolTip="{Binding Path}">
+                                                            <StackPanel>
+                                                                <Grid Width="26" Height="26" HorizontalAlignment="Center">
+                                                                    <Image Source="{Binding Icon}" Width="26" Height="26" />
+                                                                    <Border Width="20" Height="20" Background="Transparent"
+                                                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                                            Margin="0,-7,-9,0" Cursor="Hand"
+                                                                            Tag="{Binding}" MouseLeftButtonDown="OnNetworkFileRemove">
+                                                                        <Border Width="13" Height="13" CornerRadius="6.5"
+                                                                                Background="#DD1C1C1E" BorderBrush="#55FFFFFF" BorderThickness="1"
+                                                                                IsHitTestVisible="False">
+                                                                            <TextBlock Text="✕" Foreground="White" FontSize="{StaticResource FontMicro}"
+                                                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                        </Border>
+                                                                    </Border>
+                                                                </Grid>
+                                                                <TextBlock Text="{Binding Name}" Foreground="#DDFFFFFF"
+                                                                           FontSize="{StaticResource FontTiny}"
+                                                                           TextTrimming="CharacterEllipsis" TextAlignment="Center"
+                                                                           MaxWidth="42" Margin="0,2,0,0" />
+                                                            </StackPanel>
                                                         </Border>
-                                                    </Border>
-                                                </Grid>
-                                                <TextBlock Text="{Binding Name}" Foreground="#DDFFFFFF" FontSize="{StaticResource FontTiny}"
-                                                           TextTrimming="CharacterEllipsis" TextAlignment="Center"
-                                                           MaxWidth="46" Margin="0,3,0,0" />
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Border>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                    VerticalAlignment="Center" Margin="4,0,0,0">
-                            <!-- T → ouvre le champ de saisie texte -->
-                            <Button Style="{StaticResource MediaButton}" Width="30" Height="30"
-                                    ToolTip="Écrire un message texte" Click="OnToggleTextInput">
-                                <TextBlock Text="T" Foreground="#CCFFFFFF" FontSize="{StaticResource FontHeadline}" FontWeight="SemiBold"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Button>
-                            <!-- 🖼 → image depuis le presse-papier -->
-                            <Button Style="{StaticResource MediaButton}" Width="30" Height="30"
-                                    ToolTip="Coller image (presse-papier)" Click="OnPasteImage"
-                                    Margin="2,0,0,0">
-                                <Path Fill="#CCFFFFFF" Stretch="Uniform" Width="15" Height="15"
-                                      Data="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                            </Button>
-                        </StackPanel>
+                                <!-- Barre d'action : T, image, flèche envoi -->
+                                <Grid Grid.Row="1" Margin="0,4,0,0">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Button Style="{StaticResource MediaButton}" Width="26" Height="26"
+                                                ToolTip="Écrire un message texte" Click="OnToggleTextInput">
+                                            <TextBlock Text="T" Foreground="#CCFFFFFF"
+                                                       FontSize="{StaticResource FontHeadline}" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Button>
+                                        <Button Style="{StaticResource MediaButton}" Width="26" Height="26"
+                                                Margin="2,0,0,0" ToolTip="Coller image (presse-papier)" Click="OnPasteImage">
+                                            <Path Fill="#CCFFFFFF" Stretch="Uniform" Width="14" Height="14"
+                                                  Data="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                                        </Button>
+                                    </StackPanel>
+                                    <!-- Flèche → ouvre le sous-menu appareils -->
+                                    <Button x:Name="SendArrowButton"
+                                            HorizontalAlignment="Right"
+                                            Style="{StaticResource MediaButton}" Width="32" Height="32"
+                                            ToolTip="Choisir un appareil et envoyer"
+                                            Click="OnShowPeerPicker"
+                                            IsEnabled="False">
+                                        <Path Fill="#CCFFFFFF" Stretch="Uniform" Width="15" Height="15"
+                                              Data="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <!-- PEER PICKER : sous-menu appareils (s'affiche sur la flèche) -->
+                        <Grid x:Name="PeerPickerPanel" Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- En-tête : retour + titre -->
+                            <Grid Grid.Row="0" Margin="0,0,0,6">
+                                <Button HorizontalAlignment="Left"
+                                        Style="{StaticResource MediaButton}" Width="26" Height="26"
+                                        ToolTip="Retour" Click="OnHidePeerPicker">
+                                    <Path Fill="#CCFFFFFF" Stretch="Uniform" Width="15" Height="15"
+                                          Data="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                                </Button>
+                                <TextBlock Text="Envoyer à…"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="#BBFFFFFF" FontSize="{StaticResource FontHeadline}" />
+                            </Grid>
+
+                            <!-- Liste des appareils -->
+                            <Grid Grid.Row="1">
+                                <TextBlock x:Name="PeerEmptyText"
+                                           Text="Recherche d'appareils LocalSend sur le réseau…"
+                                           Foreground="#8AFFFFFF" FontSize="{StaticResource FontCaption2}"
+                                           TextWrapping="Wrap" TextAlignment="Center"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           MaxWidth="360" />
+                                <ItemsControl x:Name="PeerList" Visibility="Collapsed">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,2" Padding="10,7" CornerRadius="{StaticResource RadiusXL}"
+                                                    Background="#18FFFFFF" Cursor="Hand"
+                                                    MouseLeftButtonDown="OnPeerClick">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Path Grid.Column="0" Fill="#CCFFFFFF"
+                                                          Stretch="Uniform" Width="16" Height="16"
+                                                          Margin="0,0,10,0" VerticalAlignment="Center"
+                                                          IsHitTestVisible="False"
+                                                          Data="{Binding DeviceIconPath}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Alias}"
+                                                               Foreground="White" FontSize="{StaticResource FontHeadline}"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               IsHitTestVisible="False" />
+                                                    <Path Grid.Column="2" Fill="#99FFFFFF"
+                                                          Stretch="None" VerticalAlignment="Center"
+                                                          Margin="8,0,0,0" IsHitTestVisible="False"
+                                                          Data="M8 5v14l11-7z" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Grid>
                     </Grid>
 
                     <!-- Saisie texte (masquée par défaut, apparaît au clic de T) -->
                     <Border x:Name="TextInputPanel" Grid.Row="2"
                             Background="#20FFFFFF" CornerRadius="{StaticResource RadiusXL}" Padding="8,5"
-                            Margin="0,0,0,5" Visibility="Collapsed">
+                            Margin="0,4,0,0" Visibility="Collapsed">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -645,51 +675,11 @@
                         </Grid>
                     </Border>
 
-                    <!-- Pairs + statut d'envoi -->
-                    <Grid Grid.Row="3">
-                        <TextBlock x:Name="PeerEmptyText"
-                                   Text="Recherche d'appareils LocalSend sur le réseau..."
-                                   Foreground="#8AFFFFFF" FontSize="{StaticResource FontCaption2}"
-                                   TextWrapping="Wrap" TextAlignment="Center"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   MaxWidth="360" />
-                        <ItemsControl x:Name="PeerList" Visibility="Collapsed">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Margin="0,2" Padding="10,7" CornerRadius="{StaticResource RadiusXL}"
-                                            Background="#18FFFFFF" Cursor="Hand"
-                                            MouseLeftButtonDown="OnPeerClick">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <Path Grid.Column="0" Fill="#CCFFFFFF"
-                                                  Stretch="Uniform" Width="16" Height="16"
-                                                  Margin="0,0,10,0" VerticalAlignment="Center"
-                                                  IsHitTestVisible="False"
-                                                  Data="{Binding DeviceIconPath}" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Alias}"
-                                                       Foreground="White" FontSize="{StaticResource FontHeadline}"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       IsHitTestVisible="False" />
-                                            <Path Grid.Column="2" Fill="#99FFFFFF"
-                                                  Stretch="None" VerticalAlignment="Center"
-                                                  Margin="8,0,0,0" IsHitTestVisible="False"
-                                                  Data="M8 5v14l11-7z" />
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <!-- Retour visuel après envoi -->
-                        <TextBlock x:Name="SendStatus" Text=""
-                                   Foreground="#AAD4EDFF" FontSize="{StaticResource FontCaption2}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                                   Margin="0,0,0,2" Visibility="Collapsed" />
-                    </Grid>
+                    <!-- Statut d'envoi -->
+                    <TextBlock x:Name="SendStatus" Grid.Row="3" Text=""
+                               Foreground="#AAD4EDFF" FontSize="{StaticResource FontCaption2}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Margin="0,4,0,0" Visibility="Collapsed" />
                 </Grid>
 
                 <!-- ===== PAGE AUDIO : sortie + microphone ===== -->
@@ -1059,9 +1049,9 @@
                         <Path Fill="#CCFFFFFF" Stretch="Uniform" Width="26" Height="26"
                               HorizontalAlignment="Center"
                               Data="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z" />
-                        <TextBlock Text="Garder" Foreground="White" FontSize="{StaticResource FontHeadline}" FontWeight="SemiBold"
+                        <TextBlock Text="Ajouter" Foreground="White" FontSize="{StaticResource FontHeadline}" FontWeight="SemiBold"
                                    HorizontalAlignment="Center" Margin="0,6,0,0" />
-                        <TextBlock Text="dans la Boîte" Foreground="#99FFFFFF" FontSize="{StaticResource FontCaption2}"
+                        <TextBlock Text="à l'envoi" Foreground="#99FFFFFF" FontSize="{StaticResource FontCaption2}"
                                    HorizontalAlignment="Center" Margin="0,1,0,0" />
                     </StackPanel>
                 </Border>

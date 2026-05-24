@@ -188,10 +188,8 @@ public partial class MainWindow : Window
     private DispatcherTimer? _topmostTimer;
     private IntPtr _hwnd;
     private SettingsWindow? _settingsWindow;
-    private readonly ObservableCollection<ShelfItem> _shelf        = new();
     private readonly ObservableCollection<ShelfItem> _networkFiles = new();
-    private Point _shelfDragStart;
-    private bool  _shelfDragArmed;
+    private bool  _showingPeerPicker;
     private IncomingTransfer? _pendingTransfer;
     private bool _keepAwake;
 
@@ -963,10 +961,8 @@ public partial class MainWindow : Window
             _ = RefreshICalEventsAsync();
         StartBattery();
         // Lava démarre paresseusement au premier open (ResumeLava dans UpdateNotchVisual)
-        ShelfList.ItemsSource = _shelf;
         AudioDeviceList.ItemsSource = _audioService.Devices;
         MicDeviceList.ItemsSource   = _audioService.CaptureDevices;
-        UpdateShelfEmpty();
         NetworkFilesList.ItemsSource = _networkFiles;
         _networkFiles.CollectionChanged += (_, _) => { UpdateNetworkFilesVisibility(); RefreshNetworkLayout(); UpdateNetworkBadge(); };
 
@@ -1005,11 +1001,10 @@ public partial class MainWindow : Window
     private static readonly SolidColorBrush TabActive   = new(Color.FromRgb(0xFF, 0xFF, 0xFF));
     private static readonly SolidColorBrush TabInactive = new(Color.FromArgb(0x99, 0xFF, 0xFF, 0xFF));
 
-    private enum NotchPage { Home, Shelf, Network, Audio, Calendar }
+    private enum NotchPage { Home, Network, Audio, Calendar }
     private NotchPage _currentPage = NotchPage.Home;
 
     private void OnHomeTabClick(object sender, RoutedEventArgs e)     => ShowPage(NotchPage.Home);
-    private void OnInboxTabClick(object sender, RoutedEventArgs e)    => ShowPage(NotchPage.Shelf);
     private void OnNetworkTabClick(object sender, RoutedEventArgs e)  => ShowPage(NotchPage.Network);
     private void OnAudioTabClick(object sender, RoutedEventArgs e)    => ShowPage(NotchPage.Audio);
     private void OnCalendarTabClick(object sender, RoutedEventArgs e) => ShowPage(NotchPage.Calendar);
@@ -1105,7 +1100,6 @@ public partial class MainWindow : Window
         _currentPage = page;
 
         HomeIcon.Fill     = page == NotchPage.Home     ? TabActive : TabInactive;
-        InboxIcon.Fill    = page == NotchPage.Shelf    ? TabActive : TabInactive;
         NetworkIcon.Fill  = page == NotchPage.Network  ? TabActive : TabInactive;
         AudioIcon.Fill    = page == NotchPage.Audio    ? TabActive : TabInactive;
         CalendarIcon.Fill = page == NotchPage.Calendar ? TabActive : TabInactive;
@@ -1137,7 +1131,6 @@ public partial class MainWindow : Window
     private (FrameworkElement view, TranslateTransform t) ViewFor(NotchPage p) => p switch
     {
         NotchPage.Home     => (HomeView,     HomeViewT),
-        NotchPage.Shelf    => (InboxView,    InboxViewT),
         NotchPage.Audio    => (AudioView,    AudioViewT),
         NotchPage.Calendar => (CalendarView, CalendarViewT),
         _                  => (NetworkView,  NetworkViewT),
@@ -1277,8 +1270,8 @@ public partial class MainWindow : Window
             && e.Data.GetData(DataFormats.FileDrop) is string[] paths)
         {
             foreach (var path in paths)
-                AddToShelf(path);
-            ShowPage(NotchPage.Shelf);
+                AddToNetworkFile(path);
+            ShowPage(NotchPage.Network);
         }
         HideDragOverlay(collapse: false);
         e.Handled = true;
@@ -1308,56 +1301,6 @@ public partial class MainWindow : Window
         scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(to, dur) { EasingFunction = ease });
     }
 
-    private void AddToShelf(string path)
-    {
-        if (string.IsNullOrEmpty(path) || _shelf.Any(s => s.Path == path))
-            return;
-
-        string name = Directory.Exists(path)
-            ? new DirectoryInfo(path).Name
-            : System.IO.Path.GetFileName(path);
-
-        _shelf.Add(new ShelfItem { Path = path, Name = name, Icon = GetFileIcon(path) });
-        UpdateShelfEmpty();
-    }
-
-    private void OnShelfItemRemove(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is FrameworkElement fe && fe.Tag is ShelfItem item)
-        {
-            _shelf.Remove(item);
-            UpdateShelfEmpty();
-            e.Handled = true;   // n'enclenche pas le drag du chip
-        }
-    }
-
-    private void OnShelfItemMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        _shelfDragStart = e.GetPosition(null);
-        _shelfDragArmed = true;
-    }
-
-    private void OnShelfItemMouseMove(object sender, MouseEventArgs e)
-    {
-        if (!_shelfDragArmed || e.LeftButton != MouseButtonState.Pressed)
-            return;
-
-        Point pos = e.GetPosition(null);
-        if (Math.Abs(pos.X - _shelfDragStart.X) < SystemParameters.MinimumHorizontalDragDistance &&
-            Math.Abs(pos.Y - _shelfDragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
-            return;
-
-        _shelfDragArmed = false;
-        if (sender is FrameworkElement fe && fe.DataContext is ShelfItem item)
-        {
-            var data = new DataObject(DataFormats.FileDrop, new[] { item.Path });
-            DragDrop.DoDragDrop(fe, data, DragDropEffects.Copy);
-        }
-    }
-
-    private void UpdateShelfEmpty()
-        => ShelfEmpty.Visibility = _shelf.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
     // ===== Onglet Réseau : fichiers en attente d'envoi =====
 
     private void AddToNetworkFile(string path, string? displayName = null)
@@ -1380,7 +1323,12 @@ public partial class MainWindow : Window
     }
 
     private void UpdateNetworkFilesVisibility()
-        => NetworkFilesScroll.Visibility = _networkFiles.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    {
+        bool has = _networkFiles.Count > 0;
+        NetworkFilesScroll.Visibility = has ? Visibility.Visible : Visibility.Collapsed;
+        SendHint.Visibility           = has ? Visibility.Collapsed : Visibility.Visible;
+        SendArrowButton.IsEnabled     = has;
+    }
 
     /// <summary>Met à jour le badge sur l'icône de l'onglet Réseau.</summary>
     private void UpdateNetworkBadge()
@@ -1395,6 +1343,43 @@ public partial class MainWindow : Window
         bool has = _localSend.Peers.Count > 0;
         PeerEmptyText.Visibility = has ? Visibility.Collapsed : Visibility.Visible;
         PeerList.Visibility      = has ? Visibility.Visible   : Visibility.Collapsed;
+    }
+
+    // ── Peer picker (sous-menu appareils) ────────────────────────────────
+
+    private void OnShowPeerPicker(object sender, RoutedEventArgs e) => ShowPeerPicker();
+    private void OnHidePeerPicker(object sender, RoutedEventArgs e) => HidePeerPicker();
+
+    private void ShowPeerPicker()
+    {
+        _showingPeerPicker = true;
+        SharePanel.Visibility       = Visibility.Collapsed;
+        PeerPickerPanel.Visibility  = Visibility.Visible;
+        RefreshNetworkLayout();
+    }
+
+    private void HidePeerPicker()
+    {
+        _showingPeerPicker = false;
+        PeerPickerPanel.Visibility  = Visibility.Collapsed;
+        SharePanel.Visibility       = Visibility.Visible;
+        RefreshNetworkLayout();
+    }
+
+    // ── Drop zones internes (notch déjà ouverte) ─────────────────────────
+
+    private void OnSendZoneDragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void OnSendZoneDrop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(DataFormats.FileDrop) && e.Data.GetData(DataFormats.FileDrop) is string[] paths)
+            foreach (var path in paths)
+                AddToNetworkFile(path);
+        e.Handled = true;
     }
 
     // ── Hauteur dynamique (onglet Réseau) ─────────────────────────────────
@@ -1413,15 +1398,21 @@ public partial class MainWindow : Window
 
     private double GetNetworkExpandedHeight()
     {
-        const double baseH        = 58;   // barre du haut + marges
-        const double peerRowH     = 42;   // hauteur d'une ligne pair
-        const double textPanelH   = 46;   // panneau saisie texte
-        const double incomingH    = 84;   // panneau transfert entrant
-        double filesZone    = _networkFiles.Count > 0 ? 52 : 0;
-        double textZone     = (TextInputPanel?.Visibility  == Visibility.Visible) ? textPanelH : 0;
-        double incomingZone = (IncomingPanel?.Visibility   == Visibility.Visible) ? incomingH  : 0;
-        double needed = baseH + incomingZone + filesZone + textZone + _localSend.Peers.Count * peerRowH;
-        return Math.Max(_settings.ExpandedHeight, needed);
+        const double baseH       = 58;   // barre du haut + marges
+        const double peerRowH    = 42;   // hauteur d'une ligne pair
+        const double textPanelH  = 46;   // panneau saisie texte
+        const double incomingH   = 84;   // panneau transfert entrant
+        const double shareAreaH  = 120;  // deux colonnes (Boîte + Envoi)
+        const double pickerHdrH  = 36;   // en-tête du peer picker
+
+        double incomingZone = (IncomingPanel?.Visibility  == Visibility.Visible) ? incomingH : 0;
+        double textZone     = (TextInputPanel?.Visibility == Visibility.Visible) ? textPanelH : 0;
+
+        double mainZone = _showingPeerPicker
+            ? pickerHdrH + Math.Max(40, _localSend.Peers.Count * peerRowH)
+            : shareAreaH;
+
+        return Math.Max(_settings.ExpandedHeight, baseH + incomingZone + mainZone + textZone);
     }
 
     /// <summary>Redimensionne la fenêtre et rafraîchit la notch quand le contenu réseau change.</summary>
@@ -1442,7 +1433,10 @@ public partial class MainWindow : Window
     private async void OnPeerClick(object sender, MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement fe && fe.DataContext is LocalSendPeer peer)
+        {
+            HidePeerPicker();
             await SendToPeerAsync(peer);
+        }
     }
 
     private async Task SendToPeerAsync(LocalSendPeer peer)
